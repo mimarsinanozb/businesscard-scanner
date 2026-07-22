@@ -155,6 +155,42 @@
   .paste-area{background:#1E2127;border:1px solid #33373F;color:#EDEAE3;min-height:120px}
   .paste-area::placeholder{color:#6E727A}
   .paste-area:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.2)}
+
+  /* tabs + archive */
+  .tabs{display:flex;gap:8px;margin:4px 2px 22px}
+  .tab{flex:0 0 auto;background:#EFEBE1;border:1px solid var(--line);color:#6B655A;font-family:inherit;font-weight:600;font-size:14.5px;padding:9px 16px;border-radius:11px;cursor:pointer}
+  .tab-active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .tab-count{display:inline-block;min-width:20px;padding:0 6px;margin-left:4px;background:rgba(255,255,255,.18);border-radius:20px;font-size:12px;text-align:center}
+  .tab:not(.tab-active) .tab-count{background:#E0DACE;color:#6B655A}
+  .arch-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+  .clearall{background:none;border:1px solid #E4C9BC;color:var(--danger);font-family:inherit;font-weight:600;font-size:13px;padding:8px 12px;border-radius:9px;cursor:pointer}
+  .clearall:hover{background:#F7E9E2}
+  .stat-line{font-size:15px;color:var(--text);margin-bottom:14px}
+  .stat-line b{color:var(--ink)}
+  .arch-bars{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .barrow{display:flex;align-items:center;gap:10px;background:none;border:0;padding:4px 2px;cursor:pointer;font-family:inherit;text-align:left;width:100%}
+  .barrow.active .barlabel{color:var(--accent);font-weight:600}
+  .barlabel{flex:0 0 34%;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bartrack{flex:1;height:9px;background:#E7E1D5;border-radius:20px;overflow:hidden}
+  .barfill{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#7A8BF0);border-radius:20px}
+  .barrow.active .barfill{background:linear-gradient(90deg,var(--brass),#E7CE8E)}
+  .barnum{flex:0 0 auto;font-family:"JetBrains Mono",monospace;font-size:12.5px;color:var(--muted);min-width:20px;text-align:right}
+  .arch-search{margin-bottom:12px}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+  .chip{background:#EFEBE1;border:1px solid var(--line);color:#6B655A;font-family:inherit;font-size:13px;font-weight:600;padding:7px 12px;border-radius:20px;cursor:pointer}
+  .chip.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .arch-empty{color:var(--muted);font-size:14px;padding:18px 4px}
+  .arch-rec{flex-wrap:wrap}
+  .arch-rec .meta{min-width:60%}
+  .arch-rec .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{font-size:11.5px;font-weight:600;color:#6B655A;background:#EFEBE1;border:1px solid var(--line);border-radius:6px;padding:2px 7px}
+  .tag.sec{color:#274690;background:#E7ECFB;border-color:#CDD8F3}
+  .arch-rec .r-actions{flex-basis:100%;justify-content:flex-start;margin-top:6px;flex-wrap:wrap}
+  .r-actions a.rbtn{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer;text-decoration:none;display:inline-block}
+  .r-actions a.rbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .r-actions .del{color:var(--danger);border-color:#E4C9BC}
+  .r-actions .del:hover{background:#F7E9E2}
+  @media(min-width:600px){ .arch-rec .r-actions{flex-basis:auto;margin-top:0;justify-content:flex-end} .arch-rec .meta{min-width:0} }
 </style>
 </head>
 <body>
@@ -165,6 +201,13 @@
     <h1>Kartı <em>kişiye</em> çevir.</h1>
     <p class="lede">Bir kartvizitin fotoğrafını çek. Metin telefonunda okunur, sen kontrol edersin, iPhone'una eklemeye hazır bir kişi dosyası çıkar. Her şey cihazında olur.</p>
   </header>
+
+  <nav class="tabs">
+    <button class="tab tab-active" id="tabScan" type="button">Tara</button>
+    <button class="tab" id="tabArchive" type="button">Arşiv <span class="tab-count" id="tabCount">0</span></button>
+  </nav>
+
+  <div id="scanView">
 
   <section class="capture" aria-label="Kart yakala">
     <div class="cap-top">
@@ -183,6 +226,10 @@
         <option value="claude-sonnet-5">Sonnet 5 — daha isabetli</option>
         <option value="claude-haiku-4-5-20251001">Haiku 4.5 — daha hızlı / ucuz</option>
       </select>
+      <label class="sw-row" for="researchToggle" style="margin-top:14px">
+        <span>Firma araştırması<small>Karttaki firmayı web'de araştırıp konum + sektörü notlara yazar. Tarama başına birkaç kuruş ekler.</small></span>
+        <input type="checkbox" id="researchToggle" />
+      </label>
       <div class="set-note">Yapay zekâ modunda kart fotoğrafı okunmak üzere Anthropic'e (buluta) gönderilir. Anahtar yalnızca bu cihazın tarayıcısında saklanır; GitHub sayfasında görünmez. Anahtarı <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> üzerinden alıp istediğin an iptal edebilirsin.</div>
     </div>
     <div class="stage" id="stage">
@@ -226,6 +273,10 @@
         </div>
         <div class="field"><label for="title">Unvan</label><input class="in" id="title" placeholder="—" /></div>
         <div class="field"><label for="organization">Şirket</label><input class="in" id="organization" placeholder="—" /></div>
+        <div class="row2">
+          <div class="field"><label for="sector">Sektör</label><input class="in" id="sector" placeholder="—" /></div>
+          <div class="field"><label for="location">Konum</label><input class="in" id="location" placeholder="—" /></div>
+        </div>
         <div class="field">
           <label>Telefon</label>
           <div id="phones"></div>
@@ -274,9 +325,19 @@
     </div>
   </section>
 
-  <section class="session" id="session">
-    <h2 class="section-head" id="sessionHead">Taranan</h2>
-    <div class="cards-list" id="cardsList"></div>
+  </div><!-- /scanView -->
+
+  <section id="archiveView" hidden>
+    <div class="arch-head">
+      <h2 class="section-head" style="margin:0">Arşiv</h2>
+      <button class="clearall" id="clearAll" type="button">Tümünü temizle</button>
+    </div>
+    <div class="arch-stats" id="archStats"></div>
+    <div class="arch-bars" id="archBars"></div>
+    <input class="in arch-search" id="archSearch" placeholder="Ara: isim, şirket, sektör, şehir…" />
+    <div class="chips" id="sectorChips"></div>
+    <div class="cards-list" id="archList"></div>
+    <div class="arch-empty" id="archEmpty">Henüz taranmış kart yok. Bir kart tarayınca burada sektöre göre sınıflanır.</div>
   </section>
 
 </div>
@@ -292,11 +353,11 @@
     email:{ work:"iş", personal:"kişisel", other:"diğer" }
   };
 
-  var state = { contact: blank(), activeId:null, records:[], rawText:"", colorData:null };
-  var settings = { aiMode:false, apiKey:"", model:"claude-sonnet-5" };
+  var state = { contact: blank(), activeId:null, records:[], rawText:"", colorData:null, filterSector:null, search:"" };
+  var settings = { aiMode:false, apiKey:"", model:"claude-sonnet-5", research:true };
   var worker = null, workerReady = false;
 
-  function blank(){ return { firstName:"",lastName:"",organization:"",title:"",phones:[],emails:[],website:"",address:"",notes:"" }; }
+  function blank(){ return { firstName:"",lastName:"",organization:"",title:"",phones:[],emails:[],website:"",address:"",notes:"",sector:"",location:"" }; }
   var $ = function(id){ return document.getElementById(id); };
 
   /* ---------- Capture + downscale ---------- */
@@ -500,7 +561,7 @@
   function applyContact(c){ state.contact=c; renderForm(); renderPreview(); }
   function str(v){ return v==null?"":String(v).trim(); }
 
-  var singleIds=["firstName","lastName","organization","title","website","address","notes"];
+  var singleIds=["firstName","lastName","organization","title","sector","location","website","address","notes"];
   singleIds.forEach(function(id){
     $(id).addEventListener("input",function(){
       state.contact[id]=$(id).value; renderPreview();
@@ -625,37 +686,124 @@
     if(rec){ rec.contact=snap; } else { state.records.unshift({id:id,contact:snap,t:Date.now()}); }
     renderRecords(); saveStore();
   }
+  function eschtml(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+  function recName(c){ return [c.firstName,c.lastName].filter(Boolean).join(" ")||c.organization||"Adsız kart"; }
+  function recSector(c){ return (c.sector||"").trim(); }
+
+  function openRecord(r){
+    state.contact=JSON.parse(JSON.stringify(r.contact)); state.activeId=r.id;
+    renderForm(); renderPreview(); showView("scan"); showResults();
+    window.scrollTo({top:$("results").offsetTop-20,behavior:"smooth"});
+  }
+  function downloadVcf(c){
+    try{
+      var blob=new Blob([buildVCard(c)],{type:"text/vcard;charset=utf-8"}); var url=URL.createObjectURL(blob);
+      var a=document.createElement("a"); a.href=url; a.download=fileName(c); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){URL.revokeObjectURL(url);},4000); toast("Kişi dosyası hazır.");
+    }catch(e){ copyText(readable(c)); toast("Bilgiler kopyalandı."); }
+  }
+  function deleteRecord(id){
+    if(!confirm("Bu taramayı silmek istediğine emin misin?")) return;
+    state.records=state.records.filter(function(r){return r.id!==id;});
+    if(state.activeId===id) state.activeId=null;
+    saveStore(); renderRecords(); toast("Tarama silindi.");
+  }
+  function makeChip(text,val,active,count){
+    var b=document.createElement("button"); b.type="button"; b.className="chip"+(active?" active":"");
+    b.textContent=text+" ("+count+")";
+    b.addEventListener("click",function(){ state.filterSector=val; renderRecords(); });
+    return b;
+  }
+  function archRow(r){
+    var c=r.contact;
+    var sub=[c.title,c.organization].filter(Boolean).join(" · ");
+    var initials=((c.firstName[0]||"")+(c.lastName[0]||"")).toUpperCase()||(c.organization[0]||"?").toUpperCase();
+    var sector=recSector(c), loc=(c.location||"").trim();
+    var phone=c.phones.find(function(p){return p.value;});
+    var email=c.emails.find(function(e){return e.value;});
+    var row=document.createElement("div"); row.className="rec arch-rec";
+    var badge=document.createElement("div"); badge.className="badge"; badge.textContent=initials;
+    var meta=document.createElement("div"); meta.className="meta";
+    var b=document.createElement("b"); b.textContent=recName(c);
+    var s=document.createElement("span"); s.textContent=sub;
+    meta.appendChild(b); meta.appendChild(s);
+    if(sector||loc){
+      var tags=document.createElement("div"); tags.className="tags";
+      if(sector){ var t1=document.createElement("span"); t1.className="tag sec"; t1.textContent=sector; tags.appendChild(t1); }
+      if(loc){ var t2=document.createElement("span"); t2.className="tag"; t2.textContent=loc; tags.appendChild(t2); }
+      meta.appendChild(tags);
+    }
+    var acts=document.createElement("div"); acts.className="r-actions";
+    var open=document.createElement("button"); open.textContent="Aç"; open.addEventListener("click",function(){ openRecord(r); }); acts.appendChild(open);
+    if(phone){ var call=document.createElement("a"); call.className="rbtn"; call.textContent="Ara"; call.href="tel:"+phone.value.replace(/\s/g,""); acts.appendChild(call); }
+    if(email){ var mail=document.createElement("a"); mail.className="rbtn"; mail.textContent="Posta"; mail.href="mailto:"+email.value; acts.appendChild(mail); }
+    var dl=document.createElement("button"); dl.textContent=".vcf"; dl.addEventListener("click",function(){ downloadVcf(c); }); acts.appendChild(dl);
+    var del=document.createElement("button"); del.className="del"; del.textContent="Sil"; del.addEventListener("click",function(){ deleteRecord(r.id); }); acts.appendChild(del);
+    row.appendChild(badge); row.appendChild(meta); row.appendChild(acts);
+    return row;
+  }
+
   function renderRecords(){
-    var list=$("cardsList"); list.innerHTML="";
-    if(!state.records.length){ $("session").classList.remove("show"); return; }
-    $("session").classList.add("show");
-    $("sessionHead").textContent="Taranan — "+state.records.length;
-    state.records.forEach(function(r){
-      var c=r.contact;
-      var name=[c.firstName,c.lastName].filter(Boolean).join(" ")||c.organization||"Adsız kart";
-      var sub=[c.title,c.organization].filter(Boolean).join(" · ")||(c.emails[0]&&c.emails[0].value)||"";
-      var initials=((c.firstName[0]||"")+(c.lastName[0]||"")).toUpperCase()||(c.organization[0]||"?").toUpperCase();
-      var row=document.createElement("div"); row.className="rec";
-      var badge=document.createElement("div"); badge.className="badge"; badge.textContent=initials;
-      var meta=document.createElement("div"); meta.className="meta";
-      var b=document.createElement("b"); b.textContent=name; var s=document.createElement("span"); s.textContent=sub;
-      meta.appendChild(b); meta.appendChild(s);
-      var acts=document.createElement("div"); acts.className="r-actions";
-      var open=document.createElement("button"); open.textContent="Aç";
-      open.addEventListener("click",function(){ state.contact=JSON.parse(JSON.stringify(c)); state.activeId=r.id; renderForm(); renderPreview(); showResults(); window.scrollTo({top:$("results").offsetTop-20,behavior:"smooth"}); });
-      var dl=document.createElement("button"); dl.textContent=".vcf";
-      dl.addEventListener("click",function(){
-        try{ var blob=new Blob([buildVCard(c)],{type:"text/vcard;charset=utf-8"}); var url=URL.createObjectURL(blob);
-          var a=document.createElement("a"); a.href=url; a.download=fileName(c); document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          setTimeout(function(){URL.revokeObjectURL(url);},4000); toast("Kişi dosyası hazır."); }
-        catch(e){ copyText(readable(c)); toast("Bilgiler kopyalandı."); }
+    var n=state.records.length;
+    $("tabCount").textContent=n;
+    var list=$("archList"); list.innerHTML="";
+    $("archEmpty").style.display = n ? "none" : "block";
+
+    var bySec={};
+    state.records.forEach(function(r){ var s=recSector(r.contact)||"Sınıflandırılmamış"; bySec[s]=(bySec[s]||0)+1; });
+    var secs=Object.keys(bySec).sort(function(a,b){ return bySec[b]-bySec[a]; });
+    var sectorCount=secs.filter(function(s){return s!=="Sınıflandırılmamış";}).length;
+    var topSec = secs.length ? secs[0] : "—";
+
+    $("archStats").innerHTML="";
+    if(n){
+      var stat=document.createElement("div"); stat.className="stat-line";
+      stat.innerHTML='<b>'+n+'</b> kişi · <b>'+sectorCount+'</b> sektör · en çok <b>'+eschtml(topSec)+'</b>';
+      $("archStats").appendChild(stat);
+    }
+
+    var bars=$("archBars"); bars.innerHTML="";
+    if(n){
+      var max=Math.max.apply(null,secs.map(function(s){return bySec[s];}));
+      secs.forEach(function(s){
+        var row=document.createElement("button"); row.type="button"; row.className="barrow"+(state.filterSector===s?" active":"");
+        var pct=Math.round(bySec[s]/max*100);
+        row.innerHTML='<span class="barlabel">'+eschtml(s)+'</span><span class="bartrack"><span class="barfill" style="width:'+pct+'%"></span></span><span class="barnum">'+bySec[s]+'</span>';
+        row.addEventListener("click",function(){ state.filterSector = state.filterSector===s ? null : s; renderRecords(); });
+        bars.appendChild(row);
       });
-      acts.appendChild(open); acts.appendChild(dl);
-      row.appendChild(badge); row.appendChild(meta); row.appendChild(acts); list.appendChild(row);
+    }
+
+    var chips=$("sectorChips"); chips.innerHTML="";
+    if(n){
+      chips.appendChild(makeChip("Tümü",null,state.filterSector===null,n));
+      secs.forEach(function(s){ chips.appendChild(makeChip(s,s,state.filterSector===s,bySec[s])); });
+    }
+
+    var q=(state.search||"").toLowerCase().trim();
+    var items=state.records.filter(function(r){
+      var c=r.contact;
+      if(state.filterSector!==null){ var s=recSector(c)||"Sınıflandırılmamış"; if(s!==state.filterSector) return false; }
+      if(q){
+        var hay=[recName(c),c.organization,c.title,c.sector,c.location,(c.emails[0]&&c.emails[0].value)].join(" ").toLowerCase();
+        if(hay.indexOf(q)<0) return false;
+      }
+      return true;
     });
+    items.forEach(function(r){ list.appendChild(archRow(r)); });
+    if(n && !items.length){ var no=document.createElement("div"); no.className="arch-empty"; no.style.display="block"; no.textContent="Bu filtreye uygun kart yok."; list.appendChild(no); }
+  }
+
+  function showView(v){
+    var scan = v==="scan";
+    $("scanView").hidden = !scan;
+    $("archiveView").hidden = scan;
+    $("tabScan").classList.toggle("tab-active",scan);
+    $("tabArchive").classList.toggle("tab-active",!scan);
+    if(!scan) renderRecords();
   }
   function saveStore(){
-    var payload=JSON.stringify(state.records.slice(0,50));
+    var payload=JSON.stringify(state.records.slice(0,500));
     try{ localStorage.setItem("kartscanner:records",payload); return; }catch(e){}
     if(window.storage){ try{ window.storage.set("kartscanner:records",payload,false); }catch(e){} }
   }
@@ -677,24 +825,48 @@
   /* ---------- AI mode (own API key, direct browser call) ---------- */
   function parseJSON(text){
     if(!text) return null;
-    var t=text.replace(/```json/gi,"").replace(/```/g,"").trim();
-    try{ return JSON.parse(t); }catch(e){}
-    var m=t.match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} }
+    var t=text.replace(/```json/gi,"").replace(/```/g,"");
+    try{ return JSON.parse(t.trim()); }catch(e){}
+    var objs=[], depth=0, start=-1;
+    for(var i=0;i<t.length;i++){
+      var ch=t[i];
+      if(ch==='{'){ if(depth===0) start=i; depth++; }
+      else if(ch==='}'){ if(depth>0){ depth--; if(depth===0 && start>=0){ objs.push(t.slice(start,i+1)); start=-1; } } }
+    }
+    for(var j=objs.length-1;j>=0;j--){ try{ return JSON.parse(objs[j]); }catch(e){} }
     return null;
   }
   function fromAI(p){
     var c=blank();
     c.firstName=str(p.firstName); c.lastName=str(p.lastName);
     c.organization=str(p.organization); c.title=str(p.title);
-    c.website=str(p.website); c.address=str(p.address); c.notes=str(p.notes);
+    c.website=str(p.website); c.address=str(p.address); c.notes=str(p.notes); c.sector=str(p.sector); c.location=str(p.location);
     c.phones=(Array.isArray(p.phones)?p.phones:[]).map(function(x){ x=x||{}; var v=str(x.number||x.value); var l=str(x.label).toLowerCase(); if(["mobile","work","fax","other"].indexOf(l)<0) l="mobile"; return {label:l,value:v}; }).filter(function(x){return x.value;});
     c.emails=(Array.isArray(p.emails)?p.emails:[]).map(function(x){ x=x||{}; var v=str(x.address||x.value); var l=str(x.label).toLowerCase(); if(["work","personal","other"].indexOf(l)<0) l="work"; return {label:l,value:v}; }).filter(function(x){return x.value;});
     return c;
   }
   function scanAI(){
     if(!state.colorData){ showBanner("Önce bir kart fotoğrafı seç."); return; }
-    setScanning(true); hideBar(); hideBanner(); setStatus("Yapay zekâ ile okunuyor…");
-    var prompt="You are a precise business-card parser. Read this business card image and return ONLY a minified JSON object (no markdown, no code fences, no commentary) with exactly these keys: firstName, lastName, organization, title, phones, emails, website, address, notes. phones = array of {label, number}; label one of mobile/work/fax/other. emails = array of {label, address}; label one of work/personal/other. Use an empty string or empty array when a field is absent. Preserve international phone formatting. Put the given name in firstName and family name in lastName. Do not invent anything not on the card. The card text may be in Turkish.";
+    var research = settings.research;
+    setScanning(true); hideBar(); hideBanner();
+    setStatus(research ? "Yapay zekâ okuyor ve firmayı araştırıyor…" : "Yapay zekâ ile okunuyor…");
+    var base=" phones = array of {label, number}; label one of mobile/work/fax/other. emails = array of {label, address}; label one of work/personal/other. Use an empty string or empty array when a field is absent. Preserve international phone formatting. Put the given name in firstName and family name in lastName. Do not invent contact details that are not on the card. The card text may be in Turkish.";
+    var keys=" with exactly these keys: firstName, lastName, organization, title, phones, emails, website, address, notes, sector, location.";
+    var prompt;
+    if(research){
+      prompt="You are a precise business-card parser with web access. First read this business card image and extract the contact fields. Then use the web_search tool to research the company (the organization on the card): find where it is based (city and/or country) and what industry/sector it operates in. Write ONE short sentence in Turkish into the 'notes' field giving the company's location and sector, e.g. 'Istanbul merkezli, mobilya sektorunde faaliyet gosteren bir firma.' Also set 'sector' to a short 1-3 word industry label in Turkish (e.g. Mobilya, Yazilim, Insaat, Lojistik, Saglik, Finans, Tekstil, Gida) and 'location' to the company's city and/or country (e.g. 'Istanbul, Turkiye'). If you cannot confidently identify the company, set notes to 'Firma hakkinda guvenilir bilgi bulunamadi.' and leave sector and location empty. Your FINAL message must be ONLY a minified JSON object (no markdown, no code fences, no commentary)"+keys+base;
+    } else {
+      prompt="You are a precise business-card parser. Read this business card image and return ONLY a minified JSON object (no markdown, no code fences, no commentary). If the card clearly shows the industry or the city, fill 'sector' with a short Turkish label and 'location' with the city/country; otherwise leave them empty and do not guess."+keys+base;
+    }
+    var body={
+      model:settings.model||"claude-sonnet-5",
+      max_tokens: research?2000:1024,
+      messages:[{ role:"user", content:[
+        { type:"image", source:{ type:"base64", media_type:"image/jpeg", data:state.colorData } },
+        { type:"text", text:prompt }
+      ]}]
+    };
+    if(research){ body.tools=[{ type:"web_search_20250305", name:"web_search", max_uses:3 }]; }
     fetch("https://api.anthropic.com/v1/messages",{
       method:"POST",
       headers:{
@@ -703,14 +875,7 @@
         "anthropic-version":"2023-06-01",
         "anthropic-dangerous-direct-browser-access":"true"
       },
-      body:JSON.stringify({
-        model:settings.model||"claude-sonnet-5",
-        max_tokens:1024,
-        messages:[{ role:"user", content:[
-          { type:"image", source:{ type:"base64", media_type:"image/jpeg", data:state.colorData } },
-          { type:"text", text:prompt }
-        ]}]
-      })
+      body:JSON.stringify(body)
     }).then(function(r){ return r.json(); }).then(function(data){
       if(data && data.error){ throw new Error((data.error.type||"")+": "+(data.error.message||"api")); }
       var text=(data.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n");
@@ -736,10 +901,12 @@
       settings.aiMode = localStorage.getItem("kartscanner:aimode")==="1";
       settings.apiKey = localStorage.getItem("kartscanner:apikey")||"";
       settings.model  = localStorage.getItem("kartscanner:model")||"claude-sonnet-5";
+      var r=localStorage.getItem("kartscanner:research"); settings.research = (r===null? true : r==="1");
     }catch(e){}
     $("aiToggle").checked=settings.aiMode;
     $("apiKey").value=settings.apiKey;
     $("model").value=settings.model;
+    $("researchToggle").checked=settings.research;
     updateAiHint();
   }
   function saveSettings(){
@@ -747,6 +914,7 @@
       localStorage.setItem("kartscanner:aimode", settings.aiMode?"1":"0");
       localStorage.setItem("kartscanner:apikey", settings.apiKey);
       localStorage.setItem("kartscanner:model", settings.model);
+      localStorage.setItem("kartscanner:research", settings.research?"1":"0");
     }catch(e){}
   }
   function updateAiHint(){
@@ -758,6 +926,7 @@
   $("aiToggle").addEventListener("change",function(){ settings.aiMode=$("aiToggle").checked; saveSettings(); updateAiHint(); });
   $("apiKey").addEventListener("input",function(){ settings.apiKey=$("apiKey").value.trim(); saveSettings(); });
   $("model").addEventListener("change",function(){ settings.model=$("model").value; saveSettings(); });
+  $("researchToggle").addEventListener("change",function(){ settings.research=$("researchToggle").checked; saveSettings(); });
 
   $("pasteBtn").addEventListener("click",function(){ $("pastePanel").classList.toggle("show"); });
   $("pasteRun").addEventListener("click",function(){
@@ -768,6 +937,15 @@
     showResults();
     var id="c_"+Date.now(); state.activeId=id; upsertRecord(id,state.contact,true);
     toast("Metinden oluşturuldu — bilgileri kontrol et.");
+  });
+
+  $("tabScan").addEventListener("click",function(){ showView("scan"); });
+  $("tabArchive").addEventListener("click",function(){ showView("archive"); });
+  $("archSearch").addEventListener("input",function(){ state.search=$("archSearch").value; renderRecords(); });
+  $("clearAll").addEventListener("click",function(){
+    if(!state.records.length) return;
+    if(!confirm("Tüm arşivi silmek istediğine emin misin? Bu geri alınamaz.")) return;
+    state.records=[]; state.filterSector=null; state.search=""; saveStore(); renderRecords(); toast("Arşiv temizlendi.");
   });
 
   renderPreview();
