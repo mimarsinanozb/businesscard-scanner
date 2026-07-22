@@ -130,6 +130,31 @@
     .stage.scanning .scanline{animation:none;top:50%}
     .btn:active{transform:none}
   }
+
+  /* settings / AI mode */
+  .cap-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .gear{background:#2A2D34;color:#CFC9BC;border:0;border-radius:9px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1}
+  .gear:hover{background:#31353d}
+  .settings{display:none;margin-top:14px;padding:14px;background:#14161A;border:1px solid #2C2F36;border-radius:12px}
+  .settings.show{display:block}
+  .sw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#EDEAE3;font-size:14.5px;font-weight:600;margin-bottom:6px}
+  .sw-row small{display:block;color:#8B877E;font-weight:400;font-size:12px;margin-top:2px}
+  .sw-row input[type=checkbox]{width:46px;height:28px;accent-color:var(--accent);flex:0 0 auto;cursor:pointer}
+  .set-label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8B877E;margin:12px 0 6px;font-weight:600}
+  .settings .in{background:#1E2127;border:1px solid #33373F;color:#EDEAE3}
+  .settings .in::placeholder{color:#5C5F66}
+  .settings .in:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.2)}
+  .set-note{font-size:12px;color:#8B877E;margin-top:12px;line-height:1.55}
+  .set-note a{color:#8FA2F2}
+
+  /* paste-from-LiveText */
+  .linklike{background:none;border:0;color:#8FA2F2;font-family:inherit;font-size:13px;cursor:pointer;padding:10px 0 0;text-align:left;display:block}
+  .linklike:hover{text-decoration:underline}
+  .paste{display:none;margin-top:12px}
+  .paste.show{display:block}
+  .paste-area{background:#1E2127;border:1px solid #33373F;color:#EDEAE3;min-height:120px}
+  .paste-area::placeholder{color:#6E727A}
+  .paste-area:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.2)}
 </style>
 </head>
 <body>
@@ -142,7 +167,24 @@
   </header>
 
   <section class="capture" aria-label="Kart yakala">
-    <div class="cap-label">01 — Yakala</div>
+    <div class="cap-top">
+      <div class="cap-label">01 — Yakala</div>
+      <button class="gear" id="gear" type="button" aria-label="Ayarlar">⚙</button>
+    </div>
+    <div class="settings" id="settings">
+      <label class="sw-row" for="aiToggle">
+        <span>Yapay zekâ modu<small>Kartı Claude'un görüş modeliyle okur — cihaz üstü OCR'dan çok daha isabetli.</small></span>
+        <input type="checkbox" id="aiToggle" />
+      </label>
+      <label class="set-label" for="apiKey">Anthropic API anahtarı</label>
+      <input class="in" id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <label class="set-label" for="model">Model</label>
+      <select class="in" id="model">
+        <option value="claude-sonnet-5">Sonnet 5 — daha isabetli</option>
+        <option value="claude-haiku-4-5-20251001">Haiku 4.5 — daha hızlı / ucuz</option>
+      </select>
+      <div class="set-note">Yapay zekâ modunda kart fotoğrafı okunmak üzere Anthropic'e (buluta) gönderilir. Anahtar yalnızca bu cihazın tarayıcısında saklanır; GitHub sayfasında görünmez. Anahtarı <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> üzerinden alıp istediğin an iptal edebilirsin.</div>
+    </div>
     <div class="stage" id="stage">
       <div class="empty" id="stageEmpty">
         <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8B877E" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M8 6l1.2-2h5.6L16 6"/></svg>
@@ -165,6 +207,11 @@
       </button>
     </div>
     <div class="hint-line" id="hint">En iyi sonuç: kartı çerçeveye sığdır, düz tut, iyi ışık.</div>
+    <button class="linklike" id="pasteBtn" type="button">veya kart metnini yapıştır — iPhone Canlı Metin (en isabetli, ücretsiz) →</button>
+    <div class="paste" id="pastePanel">
+      <textarea class="in paste-area" id="pasteText" placeholder="Fotoğrafı Fotoğraflar'da aç → Canlı Metin simgesine dokun → Tümünü Seç → Kopyala, sonra buraya yapıştır…"></textarea>
+      <button class="btn btn-primary btn-block" id="pasteRun" type="button" style="margin-top:10px">Bu metinden oluştur</button>
+    </div>
   </section>
 
   <div class="banner" id="banner"></div>
@@ -245,7 +292,8 @@
     email:{ work:"iş", personal:"kişisel", other:"diğer" }
   };
 
-  var state = { contact: blank(), activeId:null, records:[], rawText:"" };
+  var state = { contact: blank(), activeId:null, records:[], rawText:"", colorData:null };
+  var settings = { aiMode:false, apiKey:"", model:"claude-sonnet-5" };
   var worker = null, workerReady = false;
 
   function blank(){ return { firstName:"",lastName:"",organization:"",title:"",phones:[],emails:[],website:"",address:"",notes:"" }; }
@@ -261,13 +309,15 @@
     reader.onload = function(ev){
       var img = new Image();
       img.onload = function(){
-        var max = 1700;
+        var max = 2000;
         var scale = Math.min(1, max / Math.max(img.width, img.height));
         var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
         // preview canvas (color)
         var pc = document.createElement("canvas"); pc.width=w; pc.height=h;
         pc.getContext("2d").drawImage(img,0,0,w,h);
-        $("preview").src = pc.toDataURL("image/jpeg",0.85);
+        var colorURL = pc.toDataURL("image/jpeg",0.85);
+        $("preview").src = colorURL;
+        state.colorData = colorURL.split(",")[1];
         $("preview").style.display="block";
         $("stageEmpty").style.display="none";
         $("stage").classList.add("has-img");
@@ -301,6 +351,11 @@
   $("scanBtn").addEventListener("click", scan);
 
   function scan(){
+    if(!ocrCanvas && !state.colorData) return;
+    if(settings.aiMode){
+      if(!settings.apiKey){ showBanner("Yapay zekâ modu açık ama API anahtarı yok. ⚙ Ayarlar'dan anahtarı ekle ya da modu kapat."); return; }
+      scanAI(); return;
+    }
     if(!ocrCanvas) return;
     if(typeof Tesseract==="undefined" || window.__tessFail){
       showBanner("Tanıma motoru yüklenemedi. Bu dosyayı iPhone'da Dosyalar'dan indir, Safari'de aç ve internetli bir bağlantıyla ilk taramayı yap (motor bir kez inip cihazda saklanır).");
@@ -618,7 +673,105 @@
   function showBanner(m){ var b=$("banner"); b.textContent=m; b.classList.add("show"); }
   function hideBanner(){ $("banner").classList.remove("show"); }
 
+
+  /* ---------- AI mode (own API key, direct browser call) ---------- */
+  function parseJSON(text){
+    if(!text) return null;
+    var t=text.replace(/```json/gi,"").replace(/```/g,"").trim();
+    try{ return JSON.parse(t); }catch(e){}
+    var m=t.match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} }
+    return null;
+  }
+  function fromAI(p){
+    var c=blank();
+    c.firstName=str(p.firstName); c.lastName=str(p.lastName);
+    c.organization=str(p.organization); c.title=str(p.title);
+    c.website=str(p.website); c.address=str(p.address); c.notes=str(p.notes);
+    c.phones=(Array.isArray(p.phones)?p.phones:[]).map(function(x){ x=x||{}; var v=str(x.number||x.value); var l=str(x.label).toLowerCase(); if(["mobile","work","fax","other"].indexOf(l)<0) l="mobile"; return {label:l,value:v}; }).filter(function(x){return x.value;});
+    c.emails=(Array.isArray(p.emails)?p.emails:[]).map(function(x){ x=x||{}; var v=str(x.address||x.value); var l=str(x.label).toLowerCase(); if(["work","personal","other"].indexOf(l)<0) l="work"; return {label:l,value:v}; }).filter(function(x){return x.value;});
+    return c;
+  }
+  function scanAI(){
+    if(!state.colorData){ showBanner("Önce bir kart fotoğrafı seç."); return; }
+    setScanning(true); hideBar(); hideBanner(); setStatus("Yapay zekâ ile okunuyor…");
+    var prompt="You are a precise business-card parser. Read this business card image and return ONLY a minified JSON object (no markdown, no code fences, no commentary) with exactly these keys: firstName, lastName, organization, title, phones, emails, website, address, notes. phones = array of {label, number}; label one of mobile/work/fax/other. emails = array of {label, address}; label one of work/personal/other. Use an empty string or empty array when a field is absent. Preserve international phone formatting. Put the given name in firstName and family name in lastName. Do not invent anything not on the card. The card text may be in Turkish.";
+    fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key":settings.apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:settings.model||"claude-sonnet-5",
+        max_tokens:1024,
+        messages:[{ role:"user", content:[
+          { type:"image", source:{ type:"base64", media_type:"image/jpeg", data:state.colorData } },
+          { type:"text", text:prompt }
+        ]}]
+      })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data && data.error){ throw new Error((data.error.type||"")+": "+(data.error.message||"api")); }
+      var text=(data.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n");
+      var parsed=parseJSON(text); if(!parsed) throw new Error("json");
+      applyContact(fromAI(parsed));
+      state.rawText=""; $("raw").classList.remove("show");
+      setScanning(false); setStatus("");
+      showResults();
+      var id="c_"+Date.now(); state.activeId=id; upsertRecord(id,state.contact,true);
+      toast("Yapay zekâ ile okundu — kontrol et.");
+    }).catch(function(err){
+      setScanning(false); setStatus("");
+      var msg=String(err && err.message || "");
+      if(/authentication|api[_-]?key|invalid|401|permission/i.test(msg)) showBanner("API anahtarı geçersiz ya da yetkisiz görünüyor. ⚙ Ayarlar'dan kontrol et (console.anthropic.com).");
+      else if(/rate|429|overloaded|529|billing|credit/i.test(msg)) showBanner("Kota/limit ya da yoğunluk sorunu: "+msg+". Birkaç saniye sonra tekrar dene ya da bakiyeni kontrol et.");
+      else showBanner("Yapay zekâ ile okunamadı ("+(msg||"bağlantı hatası")+"). İnternetini kontrol et ya da ⚙ Ayarlar'dan modu kapatıp cihaz üstü OCR kullan.");
+    });
+  }
+
+  /* ---------- settings ---------- */
+  function loadSettings(){
+    try{
+      settings.aiMode = localStorage.getItem("kartscanner:aimode")==="1";
+      settings.apiKey = localStorage.getItem("kartscanner:apikey")||"";
+      settings.model  = localStorage.getItem("kartscanner:model")||"claude-sonnet-5";
+    }catch(e){}
+    $("aiToggle").checked=settings.aiMode;
+    $("apiKey").value=settings.apiKey;
+    $("model").value=settings.model;
+    updateAiHint();
+  }
+  function saveSettings(){
+    try{
+      localStorage.setItem("kartscanner:aimode", settings.aiMode?"1":"0");
+      localStorage.setItem("kartscanner:apikey", settings.apiKey);
+      localStorage.setItem("kartscanner:model", settings.model);
+    }catch(e){}
+  }
+  function updateAiHint(){
+    $("hint").textContent = settings.aiMode
+      ? "Yapay zekâ modu açık — kart okunmak için buluta gönderilir, çok daha isabetli."
+      : "En iyi sonuç: kartı çerçeveye sığdır, düz tut, iyi ışık.";
+  }
+  $("gear").addEventListener("click",function(){ $("settings").classList.toggle("show"); });
+  $("aiToggle").addEventListener("change",function(){ settings.aiMode=$("aiToggle").checked; saveSettings(); updateAiHint(); });
+  $("apiKey").addEventListener("input",function(){ settings.apiKey=$("apiKey").value.trim(); saveSettings(); });
+  $("model").addEventListener("change",function(){ settings.model=$("model").value; saveSettings(); });
+
+  $("pasteBtn").addEventListener("click",function(){ $("pastePanel").classList.toggle("show"); });
+  $("pasteRun").addEventListener("click",function(){
+    var t=$("pasteText").value||"";
+    if(!t.trim()){ toast("Önce kart metnini yapıştır."); return; }
+    applyContact(parseCard(t));
+    state.rawText=t; $("rawText").textContent=t.trim(); $("raw").classList.add("show");
+    showResults();
+    var id="c_"+Date.now(); state.activeId=id; upsertRecord(id,state.contact,true);
+    toast("Metinden oluşturuldu — bilgileri kontrol et.");
+  });
+
   renderPreview();
+  loadSettings();
   loadStore();
 })();
 </script>
