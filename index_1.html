@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Kart Tarayıcı" />
+<title>Kart tarayıcı</title>
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAADEElEQVR4nO3cMcpUVxiA4d+QBbiNQECsLLQMgp1LsEnhAtJZ2rkAC5sswS4gKU2RSoRAFmETBHuLgR8RX9Hh3HvumTzPAg7nHt757txhZm58eP/uCr7kh9kb4LjEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZDEQRIH6cftlv7n5aPtFudTPz/8fYtlt5ocytjTRqe9SRzK2N8WZz4+DmXMMvzkB8ehjLnGnr+nFZI4SOIgiYMkDpI4SOIgiYN048P7dwOX++nWvYGrcYZ/374etZTJQRIHSRwkcZDEQRIHSRwkcZDEQRIHSRwkcZA2/MXbd3nz95+ztzDS7Tu/zN7CAPPjuLAsTk4XtXoibiukyXFc5Ni4tvrVmRwkcZDEQRIHSRwkcZAmx7H6x0Rft/rVmRyk+R+fn15eq39e9JnVZ8bJ/DhOLuM0L4zbCkkcJHGQxEESB0kcpEM8yj757dfZW/iap89ezN7CHPMnx8HLuFphhxuZHMcq577KPseaPzk4LHGQxEGaHMcqDwKr7HOs+ZPj+Od+/B1uxJ/UXhp/UssexEESB0kcJHGQxEESB+kQ3+d4+ODu7C18n5d//DV7C3uYPzmWK+NqzT2fYXIc657yujv/dvMnB4clDtLkONZ9Z7fuzr/d/Mmx4imvuOczHOJR9n9y1suZPzk4LHGQBscx8GtInGHs+ZscJHGQxsfhzjLL8JMf/O3z+4//G7gaZ3j1/OaopdxWSOIgiYMkDtLgN6Rf5DeSG9n6wXCPyeHhdgs7nOoek+OaETLEbi+2XeO4ppIz7D+A58TBEjytkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRBEgdJHCRxkMRB+ggf5H2BTV8FzAAAAABJRU5ErkJggg==" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" onerror="window.__tessFail=true"></script>
+<style>
+  :root{
+    --paper:#F5F2EB; --paper-2:#EFEBE1; --ink:#1A1C21; --text:#26282C; --muted:#7A7266;
+    --line:#DED8CB; --accent:#3B5BDB; --accent-press:#2F49B0; --brass:#C9A24B;
+    --danger:#B0472C; --ok:#2F7D52; --shadow:0 1px 0 rgba(0,0,0,.02), 0 10px 30px -18px rgba(26,28,33,.45);
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{
+    background:var(--paper);color:var(--text);
+    font-family:"Instrument Sans",system-ui,-apple-system,sans-serif;font-size:16px;line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  }
+  .wrap{max-width:960px;margin:0 auto;padding:24px 18px 64px}
+
+  .hero{padding:14px 2px 26px}
+  .eyebrow{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:10px}
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+  h1{font-family:"Fraunces",Georgia,serif;font-weight:500;font-size:clamp(34px,8vw,54px);line-height:1.02;letter-spacing:-.01em;margin:14px 0 10px;color:var(--ink)}
+  h1 em{font-style:italic;color:var(--accent)}
+  .lede{max-width:48ch;color:#54514A;font-size:16.5px}
+
+  .capture{background:var(--ink);color:#EDEAE3;border-radius:20px;padding:20px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+  .cap-label{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:#9A968C}
+  .stage{margin-top:14px;border-radius:14px;border:1.5px dashed #3A3E46;background:linear-gradient(180deg,#212429,#1c1f24);min-height:190px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
+  .stage.has-img{border-style:solid;border-color:#2C2F36}
+  .stage img{width:100%;height:100%;max-height:52vh;object-fit:contain;display:block}
+  .stage .empty{text-align:center;color:#8B877E;padding:26px;font-size:14.5px;max-width:34ch}
+  .stage .empty svg{display:block;margin:0 auto 12px;opacity:.7}
+  .scanline{position:absolute;left:0;right:0;height:2px;top:0;background:linear-gradient(90deg,transparent,var(--accent),transparent);box-shadow:0 0 16px 2px rgba(59,91,219,.7);opacity:0;pointer-events:none}
+  .stage.scanning .scanline{opacity:1;animation:sweep 1.5s ease-in-out infinite}
+  @keyframes sweep{0%{top:2%}50%{top:96%}100%{top:2%}}
+
+  .progress{height:5px;background:#2A2D34;border-radius:99px;margin-top:14px;overflow:hidden;display:none}
+  .progress.show{display:block}
+  .progress .bar{height:100%;width:0;background:linear-gradient(90deg,var(--accent),#7A8BF0);transition:width .25s ease}
+  .status{font-family:"JetBrains Mono",monospace;font-size:12px;color:#9A968C;margin-top:8px;min-height:16px}
+
+  .cap-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn{font-family:inherit;font-size:15px;font-weight:600;border:0;border-radius:11px;padding:13px 18px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;transition:transform .06s ease, background .15s ease, opacity .15s ease;-webkit-tap-highlight-color:transparent}
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn-primary{background:var(--accent);color:#fff}
+  .btn-primary:hover{background:var(--accent-press)}
+  .btn-lightghost{background:#2A2D34;color:#EDEAE3}
+  .btn-lightghost:hover{background:#31353d}
+  .btn-block{width:100%;justify-content:center}
+  .hint-line{font-size:12.5px;color:#8B877E;margin-top:10px;font-family:"JetBrains Mono",monospace}
+  input[type=file]{position:absolute;width:1px;height:1px;opacity:0;overflow:hidden}
+
+  .results{margin-top:26px;display:none}
+  .results.show{display:block}
+  .results-grid{display:grid;grid-template-columns:1fr;gap:22px}
+  .section-head{font-family:"JetBrains Mono",monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin:0 0 14px;display:flex;align-items:center;gap:10px}
+  .section-head::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .field{margin-bottom:14px}
+  .field > label{display:block;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:600}
+  .in{width:100%;font-family:"JetBrains Mono",monospace;font-size:15px;color:var(--ink);background:#fff;border:1px solid var(--line);border-radius:10px;padding:12px 13px;transition:border-color .15s ease, box-shadow .15s ease}
+  .in::placeholder{color:#B6AF9F}
+  .in:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.14)}
+  textarea.in{resize:vertical;min-height:64px;line-height:1.5}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+  .multi-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+  .multi-row .lab{flex:0 0 84px;font-family:"JetBrains Mono",monospace;font-size:13px;border:1px solid var(--line);border-radius:9px;background:#fff;padding:11px 6px;color:var(--ink)}
+  .multi-row .in{flex:1}
+  .icon-btn{flex:0 0 auto;width:38px;height:40px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--muted);cursor:pointer;font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center}
+  .icon-btn:hover{color:var(--danger);border-color:#E4C9BC}
+  .add-link{background:none;border:0;color:var(--accent);font-family:inherit;font-weight:600;font-size:14px;cursor:pointer;padding:4px 2px;margin-top:2px}
+  .add-link:hover{text-decoration:underline}
+
+  .side{position:sticky;top:16px}
+  .card{background:linear-gradient(160deg,#22252B,#191B20);color:#EEE9DF;border-radius:16px;padding:22px 22px 20px;position:relative;overflow:hidden;box-shadow:var(--shadow);aspect-ratio:1.66/1;display:flex;flex-direction:column}
+  .card::before{content:"";position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--brass),#E7CE8E,var(--brass))}
+  .card .mono{position:absolute;top:18px;right:18px;width:38px;height:38px;border-radius:50%;border:1px solid rgba(201,162,75,.55);color:var(--brass);display:flex;align-items:center;justify-content:center;font-family:"Fraunces",serif;font-size:15px}
+  .card .cname{font-family:"Fraunces",serif;font-weight:500;font-size:24px;line-height:1.1;margin-top:4px;max-width:75%}
+  .card .crole{font-size:13px;color:#B8B2A6;margin-top:5px;min-height:18px}
+  .card .cspacer{flex:1}
+  .card .cline{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:#CFC9BC;display:flex;align-items:center;gap:8px;margin-top:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .card .cline svg{flex:0 0 auto;opacity:.7}
+  .card .placeholder{color:#5C5F66}
+
+  .save-actions{margin-top:16px;display:flex;flex-direction:column;gap:10px}
+  .save-note{font-size:12.5px;color:var(--muted);text-align:center;font-family:"JetBrains Mono",monospace}
+
+  .raw{margin-top:16px;display:none}
+  .raw.show{display:block}
+  .raw details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:2px 14px}
+  .raw summary{cursor:pointer;font-size:13px;font-weight:600;color:var(--muted);padding:12px 0;list-style:none}
+  .raw summary::-webkit-details-marker{display:none}
+  .raw pre{font-family:"JetBrains Mono",monospace;font-size:12.5px;color:#3A3D42;white-space:pre-wrap;word-break:break-word;margin:0 0 12px;line-height:1.55}
+
+  .session{margin-top:34px;display:none}
+  .session.show{display:block}
+  .cards-list{display:flex;flex-direction:column;gap:8px}
+  .rec{display:flex;align-items:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 12px}
+  .rec .badge{flex:0 0 auto;width:38px;height:38px;border-radius:9px;background:var(--paper-2);color:var(--ink);display:flex;align-items:center;justify-content:center;font-family:"Fraunces",serif;font-size:15px}
+  .rec .meta{flex:1;min-width:0}
+  .rec .meta b{font-weight:600;font-size:15px;color:var(--ink);display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .rec .meta span{font-size:12.5px;color:var(--muted);font-family:"JetBrains Mono",monospace}
+  .rec .r-actions{display:flex;gap:6px}
+  .rec .r-actions button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:7px 11px;font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);cursor:pointer}
+  .rec .r-actions button:hover{border-color:var(--accent);color:var(--accent)}
+
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:0 12px 30px -10px rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s ease, transform .2s ease;z-index:50;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .banner{margin-top:12px;background:#F7E9E2;border:1px solid #E7C3B4;color:#8A3A22;border-radius:11px;padding:12px 14px;font-size:14px;display:none}
+  .banner.show{display:block}
+
+  @media (min-width:820px){
+    .wrap{padding:40px 26px 80px}
+    .results-grid{grid-template-columns:1.15fr .85fr;gap:34px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .stage.scanning .scanline{animation:none;top:50%}
+    .btn:active{transform:none}
+  }
+
+  /* settings / AI mode */
+  .cap-top{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .gear{background:#2A2D34;color:#CFC9BC;border:0;border-radius:9px;width:34px;height:34px;font-size:16px;cursor:pointer;line-height:1}
+  .gear:hover{background:#31353d}
+  .settings{display:none;margin-top:14px;padding:14px;background:#14161A;border:1px solid #2C2F36;border-radius:12px}
+  .settings.show{display:block}
+  .sw-row{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#EDEAE3;font-size:14.5px;font-weight:600;margin-bottom:6px}
+  .sw-row small{display:block;color:#8B877E;font-weight:400;font-size:12px;margin-top:2px}
+  .sw-row input[type=checkbox]{width:46px;height:28px;accent-color:var(--accent);flex:0 0 auto;cursor:pointer}
+  .set-label{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#8B877E;margin:12px 0 6px;font-weight:600}
+  .settings .in{background:#1E2127;border:1px solid #33373F;color:#EDEAE3}
+  .settings .in::placeholder{color:#5C5F66}
+  .settings .in:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,91,219,.2)}
+  .set-note{font-size:12px;color:#8B877E;margin-top:12px;line-height:1.55}
+  .set-note a{color:#8FA2F2}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="hero">
+    <div class="eyebrow"><span class="dot"></span> Kart → Kişi</div>
+    <h1>Kartı <em>kişiye</em> çevir.</h1>
+    <p class="lede">Bir kartvizitin fotoğrafını çek. Metin telefonunda okunur, sen kontrol edersin, iPhone'una eklemeye hazır bir kişi dosyası çıkar. Her şey cihazında olur.</p>
+  </header>
+
+  <section class="capture" aria-label="Kart yakala">
+    <div class="cap-top">
+      <div class="cap-label">01 — Yakala</div>
+      <button class="gear" id="gear" type="button" aria-label="Ayarlar">⚙</button>
+    </div>
+    <div class="settings" id="settings">
+      <label class="sw-row" for="aiToggle">
+        <span>Yapay zekâ modu<small>Kartı Claude'un görüş modeliyle okur — cihaz üstü OCR'dan çok daha isabetli.</small></span>
+        <input type="checkbox" id="aiToggle" />
+      </label>
+      <label class="set-label" for="apiKey">Anthropic API anahtarı</label>
+      <input class="in" id="apiKey" type="password" placeholder="sk-ant-..." autocomplete="off" autocapitalize="off" spellcheck="false" />
+      <label class="set-label" for="model">Model</label>
+      <select class="in" id="model">
+        <option value="claude-sonnet-5">Sonnet 5 — daha isabetli</option>
+        <option value="claude-haiku-4-5-20251001">Haiku 4.5 — daha hızlı / ucuz</option>
+      </select>
+      <div class="set-note">Yapay zekâ modunda kart fotoğrafı okunmak üzere Anthropic'e (buluta) gönderilir. Anahtar yalnızca bu cihazın tarayıcısında saklanır; GitHub sayfasında görünmez. Anahtarı <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a> üzerinden alıp istediğin an iptal edebilirsin.</div>
+    </div>
+    <div class="stage" id="stage">
+      <div class="empty" id="stageEmpty">
+        <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#8B877E" stroke-width="1.5"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M8 6l1.2-2h5.6L16 6"/></svg>
+        Henüz kart yok. Başlamak için bir tane yakala.
+      </div>
+      <img id="preview" alt="" style="display:none" />
+      <div class="scanline"></div>
+    </div>
+    <div class="progress" id="progress"><div class="bar" id="bar"></div></div>
+    <div class="status" id="status"></div>
+    <div class="cap-actions">
+      <label class="btn btn-primary" for="file" id="captureBtn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="3"/></svg>
+        Fotoğraf çek veya seç
+      </label>
+      <input type="file" id="file" accept="image/*" />
+      <button class="btn btn-lightghost" id="scanBtn" disabled>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2M4 12h16"/></svg>
+        <span id="scanBtnText">Kartı tara</span>
+      </button>
+    </div>
+    <div class="hint-line" id="hint">En iyi sonuç: kartı çerçeveye sığdır, düz tut, iyi ışık.</div>
+  </section>
+
+  <div class="banner" id="banner"></div>
+
+  <section class="results" id="results">
+    <div class="results-grid">
+      <div>
+        <h2 class="section-head">02 — Kişi bilgileri</h2>
+        <div class="row2">
+          <div class="field"><label for="firstName">Ad</label><input class="in" id="firstName" placeholder="—" /></div>
+          <div class="field"><label for="lastName">Soyad</label><input class="in" id="lastName" placeholder="—" /></div>
+        </div>
+        <div class="field"><label for="title">Unvan</label><input class="in" id="title" placeholder="—" /></div>
+        <div class="field"><label for="organization">Şirket</label><input class="in" id="organization" placeholder="—" /></div>
+        <div class="field">
+          <label>Telefon</label>
+          <div id="phones"></div>
+          <button class="add-link" id="addPhone">+ Telefon ekle</button>
+        </div>
+        <div class="field">
+          <label>E-posta</label>
+          <div id="emails"></div>
+          <button class="add-link" id="addEmail">+ E-posta ekle</button>
+        </div>
+        <div class="field"><label for="website">Web sitesi</label><input class="in" id="website" placeholder="—" /></div>
+        <div class="field"><label for="address">Adres</label><textarea class="in" id="address" placeholder="—"></textarea></div>
+        <div class="field"><label for="notes">Notlar</label><textarea class="in" id="notes" placeholder="—"></textarea></div>
+
+        <div class="raw" id="raw">
+          <details>
+            <summary>Okunan ham metni göster</summary>
+            <pre id="rawText"></pre>
+          </details>
+        </div>
+      </div>
+
+      <div>
+        <h2 class="section-head">03 — Kaydet</h2>
+        <div class="side">
+          <div class="card" id="cardPreview">
+            <div class="mono" id="cpMono">—</div>
+            <div class="cname placeholder" id="cpName">İsim</div>
+            <div class="crole" id="cpRole"></div>
+            <div class="cspacer"></div>
+            <div id="cpLines"></div>
+          </div>
+          <div class="save-actions">
+            <button class="btn btn-primary btn-block" id="addContact">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></svg>
+              Kişilere ekle
+            </button>
+            <button class="btn btn-lightghost btn-block" id="copyBtn" style="background:#EFEBE1;color:var(--ink)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+              Bilgileri kopyala
+            </button>
+            <div class="save-note">Kişiler uygulamasında onaylayacağın bir .vcf açar.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="session" id="session">
+    <h2 class="section-head" id="sessionHead">Taranan</h2>
+    <div class="cards-list" id="cardsList"></div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var LABELS = {
+    phone:{ mobile:"cep", work:"iş", fax:"faks", other:"diğer" },
+    email:{ work:"iş", personal:"kişisel", other:"diğer" }
+  };
+
+  var state = { contact: blank(), activeId:null, records:[], rawText:"", colorData:null };
+  var settings = { aiMode:false, apiKey:"", model:"claude-sonnet-5" };
+  var worker = null, workerReady = false;
+
+  function blank(){ return { firstName:"",lastName:"",organization:"",title:"",phones:[],emails:[],website:"",address:"",notes:"" }; }
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* ---------- Capture + downscale ---------- */
+  var ocrCanvas = null;
+  $("file").addEventListener("change", function(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f) return;
+    hideBanner();
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1700;
+        var scale = Math.min(1, max / Math.max(img.width, img.height));
+        var w = Math.round(img.width*scale), h = Math.round(img.height*scale);
+        // preview canvas (color)
+        var pc = document.createElement("canvas"); pc.width=w; pc.height=h;
+        pc.getContext("2d").drawImage(img,0,0,w,h);
+        var colorURL = pc.toDataURL("image/jpeg",0.85);
+        $("preview").src = colorURL;
+        state.colorData = colorURL.split(",")[1];
+        $("preview").style.display="block";
+        $("stageEmpty").style.display="none";
+        $("stage").classList.add("has-img");
+        // ocr canvas (grayscale + contrast)
+        ocrCanvas = preprocess(pc);
+        $("scanBtn").disabled=false;
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(f);
+    e.target.value="";
+  });
+
+  function preprocess(src){
+    var w=src.width, h=src.height;
+    var c=document.createElement("canvas"); c.width=w; c.height=h;
+    var ctx=c.getContext("2d"); ctx.drawImage(src,0,0);
+    var im=ctx.getImageData(0,0,w,h), d=im.data;
+    var contrast=1.35, mid=128;
+    for(var i=0;i<d.length;i+=4){
+      var g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];
+      g=(g-mid)*contrast+mid;
+      g=g<0?0:g>255?255:g;
+      d[i]=d[i+1]=d[i+2]=g;
+    }
+    ctx.putImageData(im,0,0);
+    return c;
+  }
+
+  /* ---------- OCR (on device) ---------- */
+  $("scanBtn").addEventListener("click", scan);
+
+  function scan(){
+    if(!ocrCanvas && !state.colorData) return;
+    if(settings.aiMode){
+      if(!settings.apiKey){ showBanner("Yapay zekâ modu açık ama API anahtarı yok. ⚙ Ayarlar'dan anahtarı ekle ya da modu kapat."); return; }
+      scanAI(); return;
+    }
+    if(!ocrCanvas) return;
+    if(typeof Tesseract==="undefined" || window.__tessFail){
+      showBanner("Tanıma motoru yüklenemedi. Bu dosyayı iPhone'da Dosyalar'dan indir, Safari'de aç ve internetli bir bağlantıyla ilk taramayı yap (motor bir kez inip cihazda saklanır).");
+      return;
+    }
+    setScanning(true);
+    hideBanner();
+    ensureWorker().then(function(){
+      setStatus("Kart okunuyor…");
+      return worker.recognize(ocrCanvas);
+    }).then(function(res){
+      var text=(res && res.data && res.data.text) || "";
+      state.rawText=text;
+      $("rawText").textContent = text.trim() || "(metin bulunamadı)";
+      $("raw").classList.add("show");
+      applyContact(parseCard(text));
+      setScanning(false);
+      setStatus("");
+      showResults();
+      var id="c_"+Date.now(); state.activeId=id;
+      upsertRecord(id, state.contact, true);
+      toast("Kart okundu — bilgileri kontrol et.");
+    }).catch(function(err){
+      setScanning(false); setStatus("");
+      showBanner("Kart okunamadı. Daha net, iyi ışıklı ve kartın tamamını içeren bir fotoğrafla tekrar dene. (İlk taramada motor indiği için internet gerekir.)");
+    });
+  }
+
+  function ensureWorker(){
+    if(workerReady && worker) return Promise.resolve();
+    setStatus("Motor hazırlanıyor… (ilk sefer biraz sürebilir)");
+    return Tesseract.createWorker("tur+eng", 1, {
+      logger:function(m){
+        if(m.status==="recognizing text") setStatus("Kart okunuyor… "+Math.round(m.progress*100)+"%");
+        else if(/traineddata|language/i.test(m.status)) setStatus("Dil verisi indiriliyor… "+Math.round(m.progress*100)+"%");
+        else if(/core|wasm/i.test(m.status)) setStatus("Motor indiriliyor… "+Math.round(m.progress*100)+"%");
+        else setStatus(m.status);
+        if(typeof m.progress==="number"){ showBar(); $("bar").style.width=Math.round(m.progress*100)+"%"; }
+      }
+    }).then(function(w){ worker=w; workerReady=true; });
+  }
+
+  function setScanning(on){
+    var s=$("stage");
+    if(on){ s.classList.add("scanning"); $("scanBtn").disabled=true; $("scanBtnText").textContent="Okunuyor…"; showBar(); $("bar").style.width="0%"; }
+    else { s.classList.remove("scanning"); $("scanBtn").disabled=false; $("scanBtnText").textContent="Yeniden tara"; hideBar(); }
+  }
+  function showBar(){ $("progress").classList.add("show"); }
+  function hideBar(){ $("progress").classList.remove("show"); $("bar").style.width="0%"; }
+  function setStatus(t){ $("status").textContent=t||""; }
+
+  /* ---------- Heuristic parser ---------- */
+  var reEmail=/[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}/g;
+  var reUrl=/((?:https?:\/\/)?(?:www\.)?[A-Za-z0-9\-]+(?:\.[A-Za-z0-9\-]+)+(?:\/[^\s]*)?)/g;
+  var reTitle=/(CEO|CTO|CFO|COO|Founder|Co-?Founder|President|Vice President|VP|Manager|Director|Head of|Lead|Engineer|Developer|Designer|Architect|Consultant|Specialist|Sales|Marketing|Account|Partner|Owner|Genel M[üu]d[üu]r|M[üu]d[üu]r|Y[öo]netici|Uzman|M[üu]hendis|Mimar|Tasar[ıi]m|Dan[ıi][şs]man|Sat[ıi][şs]|Pazarlama|Kurucu|Sahibi|Muhasebe|Avukat|Doktor|Dr\.?|Prof\.?|[ŞS]ef|Koordinat[öo]r|Sorumlu|Temsilci)/i;
+  var reCompany=/(Inc\.?|LLC|Ltd\.?|Corp\.?|GmbH|A\.?\s?[ŞS]\.?|Ltd\.?\s?[ŞS]ti\.?|San\.?\s?(?:ve)?\s?Tic\.?|Holding|Group|Grup|Enterprises|Company|[ŞS]irketi|Limited|Anonim|Teknoloji|Yaz[ıi]l[ıi]m|Furniture|Mobilya|Studio|Ajans|Agency)/i;
+  var reAddr=/(Cad(?:desi)?\.?|Cd\.?|Sok(?:ak|a[ğg][ıi])?\.?|Sk\.?|Mah(?:allesi)?\.?|Bulvar[ıi]?|Blv\.?|No[:.]?\s?\d|Kat[:.]?\s?\d|Daire|Blok|Plaza|Apt|Street|St\.|Avenue|Ave\.?|Road|Rd\.?|Floor|Suite|Ste\.?|\b\d{5}\b|[İI]stanbul|Ankara|[İI]zmir|Bursa|Antalya|T[üu]rkiye|Turkey)/i;
+  var reName=/^[A-Za-zÇĞİıÖŞÜçğöşü.\-']+(?:\s+[A-Za-zÇĞİıÖŞÜçğöşü.\-']+){1,3}$/;
+  var personalDomains=/(gmail|hotmail|outlook|yahoo|icloud|yandex|live|msn)\./i;
+
+  function parseCard(text){
+    var c=blank();
+    var lines=text.split(/\r?\n/).map(function(s){return s.replace(/\s{2,}/g," ").trim();}).filter(Boolean);
+    var joined=lines.join("\n");
+
+    // emails
+    var emails=(joined.match(reEmail)||[]).map(function(e){return e.trim();});
+    emails=dedupe(emails);
+    c.emails=emails.map(function(a){ return { label: personalDomains.test(a)?"personal":"work", value:a }; });
+
+    // websites (remove emails first so their domains don't match)
+    var noEmail=joined.replace(reEmail," ");
+    var urls=(noEmail.match(reUrl)||[]).map(function(u){return u.replace(/[.,;]$/,"").trim();})
+      .filter(function(u){ return /\.[A-Za-z]{2,}$/.test(u) || /\//.test(u); })
+      .filter(function(u){ return !/@/.test(u); });
+    if(urls.length) c.website=urls[0];
+
+    // phones (line-aware for labels)
+    var phones=[];
+    lines.forEach(function(ln){
+      var matches=ln.match(/(\+?\d[\d\s().\/\-]{5,}\d)/g);
+      if(!matches) return;
+      matches.forEach(function(m){
+        var digits=m.replace(/\D/g,"");
+        if(digits.length<7||digits.length>15) return;
+        var label="work";
+        if(/faks|fax/i.test(ln)) label="fax";
+        else if(/gsm|cep|mobil/i.test(ln)) label="mobile";
+        else if(/^(?:\+?90)?0?5\d{9}$/.test(digits) || /^5\d{9}$/.test(digits)) label="mobile";
+        phones.push({ label:label, value:m.replace(/\s{2,}/g," ").trim() });
+      });
+    });
+    c.phones=dedupeBy(phones,function(p){return p.value.replace(/\D/g,"");});
+
+    // company
+    var company="";
+    for(var i=0;i<lines.length;i++){ if(reCompany.test(lines[i])){ company=lines[i]; break; } }
+
+    // title
+    var title="";
+    for(var j=0;j<lines.length;j++){ if(reTitle.test(lines[j]) && lines[j]!==company){ title=lines[j]; break; } }
+
+    // name: first clean, name-like line that isn't company/title/address
+    var name="";
+    for(var k=0;k<lines.length;k++){
+      var ln=lines[k];
+      if(ln===company||ln===title) continue;
+      if(/[@\d]/.test(ln)) continue;
+      if(reUrl.test(ln) && /\.(com|net|org|co|io|tr)/i.test(ln)) continue;
+      if(reCompany.test(ln)||reAddr.test(ln)||reTitle.test(ln)) continue;
+      if(reName.test(ln)){ name=ln; break; }
+    }
+    if(name){
+      var parts=name.split(/\s+/);
+      c.lastName=parts.pop();
+      c.firstName=parts.join(" ");
+    }
+
+    // if no company found, try an ALL-CAPS line that isn't the name
+    if(!company){
+      for(var q=0;q<lines.length;q++){
+        var L=lines[q];
+        if(L===name) continue;
+        if(/[@\d]/.test(L)) continue;
+        if(L.length>2 && L===L.toUpperCase() && /[A-ZÇĞİÖŞÜ]/.test(L)){ company=L; break; }
+      }
+    }
+    c.organization=company;
+    c.title=title;
+
+    // address
+    var addr=lines.filter(function(ln){ return reAddr.test(ln) && ln!==company && ln!==name; });
+    c.address=addr.join(", ");
+
+    return c;
+  }
+
+  function dedupe(a){ var s={},o=[]; a.forEach(function(x){ var k=x.toLowerCase(); if(!s[k]){s[k]=1;o.push(x);} }); return o; }
+  function dedupeBy(a,f){ var s={},o=[]; a.forEach(function(x){ var k=f(x); if(k&&!s[k]){s[k]=1;o.push(x);} }); return o; }
+
+  /* ---------- Populate + bind ---------- */
+  function applyContact(c){ state.contact=c; renderForm(); renderPreview(); }
+  function str(v){ return v==null?"":String(v).trim(); }
+
+  var singleIds=["firstName","lastName","organization","title","website","address","notes"];
+  singleIds.forEach(function(id){
+    $(id).addEventListener("input",function(){
+      state.contact[id]=$(id).value; renderPreview();
+      if(state.activeId) upsertRecord(state.activeId,state.contact,false);
+    });
+  });
+
+  function renderForm(){
+    singleIds.forEach(function(id){ $(id).value=state.contact[id]||""; });
+    renderMulti("phones",state.contact.phones,["mobile","work","fax","other"],"Telefon numarası");
+    renderMulti("emails",state.contact.emails,["work","personal","other"],"eposta@sirket.com");
+  }
+
+  function renderMulti(kind,list,keys,placeholder){
+    var box=$(kind); box.innerHTML="";
+    var labMap=LABELS[kind==="phones"?"phone":"email"];
+    list.forEach(function(item,i){
+      var row=document.createElement("div"); row.className="multi-row";
+      var sel=document.createElement("select"); sel.className="lab";
+      keys.forEach(function(key){
+        var opt=document.createElement("option"); opt.value=key; opt.textContent=labMap[key];
+        if(key===item.label) opt.selected=true; sel.appendChild(opt);
+      });
+      sel.addEventListener("change",function(){ list[i].label=sel.value; renderPreview(); syncActive(); });
+      var inp=document.createElement("input"); inp.className="in"; inp.value=item.value; inp.placeholder=placeholder;
+      if(kind==="emails"){ inp.type="email"; inp.autocapitalize="off"; } else { inp.type="tel"; }
+      inp.addEventListener("input",function(){ list[i].value=inp.value; renderPreview(); syncActive(); });
+      var rm=document.createElement("button"); rm.className="icon-btn"; rm.type="button"; rm.setAttribute("aria-label","Kaldır"); rm.textContent="×";
+      rm.addEventListener("click",function(){ list.splice(i,1); renderMulti(kind,list,keys,placeholder); renderPreview(); syncActive(); });
+      row.appendChild(sel); row.appendChild(inp); row.appendChild(rm); box.appendChild(row);
+    });
+  }
+
+  $("addPhone").addEventListener("click",function(){ state.contact.phones.push({label:"mobile",value:""}); renderMulti("phones",state.contact.phones,["mobile","work","fax","other"],"Telefon numarası"); });
+  $("addEmail").addEventListener("click",function(){ state.contact.emails.push({label:"work",value:""}); renderMulti("emails",state.contact.emails,["work","personal","other"],"eposta@sirket.com"); });
+  function syncActive(){ if(state.activeId) upsertRecord(state.activeId,state.contact,false); }
+
+  /* ---------- Live card preview ---------- */
+  function renderPreview(){
+    var c=state.contact;
+    var name=[c.firstName,c.lastName].filter(Boolean).join(" ");
+    var nameEl=$("cpName"); nameEl.textContent=name||"İsim"; nameEl.classList.toggle("placeholder",!name);
+    var initials=((c.firstName[0]||"")+(c.lastName[0]||"")).toUpperCase()||(c.organization[0]||"").toUpperCase()||"—";
+    $("cpMono").textContent=initials;
+    $("cpRole").textContent=[c.title,c.organization].filter(Boolean).join(" · ");
+    var lines=$("cpLines"); lines.innerHTML="";
+    var phone=c.phones.find(function(p){return p.value;});
+    var email=c.emails.find(function(p){return p.value;});
+    if(phone) lines.appendChild(cardLine("phone",phone.value));
+    if(email) lines.appendChild(cardLine("mail",email.value));
+    if(c.website) lines.appendChild(cardLine("web",c.website));
+    if(!phone&&!email&&!c.website){ var ph=document.createElement("div"); ph.className="cline placeholder"; ph.textContent="iletişim bilgileri burada görünür"; lines.appendChild(ph); }
+  }
+  function cardLine(kind,text){
+    var el=document.createElement("div"); el.className="cline";
+    var icons={ phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2 4.2 2 2 0 0 1 4 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.4-1.1a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2Z"/>',
+      mail:'<rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/>',
+      web:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/>' };
+    el.innerHTML='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C9A24B" stroke-width="1.6">'+icons[kind]+'</svg><span></span>';
+    el.querySelector("span").textContent=text; return el;
+  }
+
+  /* ---------- vCard ---------- */
+  function esc(s){ return String(s||"").replace(/\\/g,"\\\\").replace(/\n/g,"\\n").replace(/,/g,"\\,").replace(/;/g,"\\;"); }
+  function buildVCard(c){
+    var L=["BEGIN:VCARD","VERSION:3.0"];
+    L.push("N:"+esc(c.lastName)+";"+esc(c.firstName)+";;;");
+    var fn=[c.firstName,c.lastName].filter(Boolean).join(" ")||c.organization||"Kişi";
+    L.push("FN:"+esc(fn));
+    if(c.organization) L.push("ORG:"+esc(c.organization));
+    if(c.title) L.push("TITLE:"+esc(c.title));
+    c.phones.forEach(function(p){ if(!p.value)return; var t=p.label==="mobile"?"CELL":(p.label==="fax"?"FAX":(p.label==="work"?"WORK":"VOICE")); L.push("TEL;TYPE="+t+":"+esc(p.value)); });
+    c.emails.forEach(function(e){ if(!e.value)return; var t=e.label==="personal"?"HOME":(e.label==="work"?"WORK":"INTERNET"); L.push("EMAIL;TYPE="+t+":"+esc(e.value)); });
+    if(c.website) L.push("URL:"+esc(c.website));
+    if(c.address) L.push("ADR;TYPE=WORK:;;"+esc(c.address)+";;;;");
+    if(c.notes) L.push("NOTE:"+esc(c.notes));
+    L.push("END:VCARD");
+    return L.join("\r\n");
+  }
+  function fileName(c){ var b=([c.firstName,c.lastName].filter(Boolean).join("_"))||c.organization||"kisi"; return b.replace(/[^A-Za-z0-9_\-]/g,"")+".vcf"; }
+
+  $("addContact").addEventListener("click",function(){
+    var c=state.contact;
+    if(!c.firstName&&!c.lastName&&!c.organization){ toast("Önce en az bir ad veya şirket ekle."); return; }
+    try{
+      var blob=new Blob([buildVCard(c)],{type:"text/vcard;charset=utf-8"});
+      var url=URL.createObjectURL(blob);
+      var a=document.createElement("a"); a.href=url; a.download=fileName(c);
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); },4000);
+      toast("Kişi dosyası hazır — açıp Kişiler'e ekle.");
+    }catch(e){ copyText(readable(c)); toast("İndirme engellendi — bilgiler kopyalandı."); }
+  });
+  $("copyBtn").addEventListener("click",function(){ copyText(readable(state.contact)); });
+
+  function readable(c){
+    var out=[]; var name=[c.firstName,c.lastName].filter(Boolean).join(" ");
+    if(name) out.push(name);
+    if(c.title||c.organization) out.push([c.title,c.organization].filter(Boolean).join(", "));
+    c.phones.forEach(function(p){ if(p.value) out.push(LABELS.phone[p.label]+": "+p.value); });
+    c.emails.forEach(function(e){ if(e.value) out.push(LABELS.email[e.label]+": "+e.value); });
+    if(c.website) out.push(c.website);
+    if(c.address) out.push(c.address);
+    if(c.notes) out.push(c.notes);
+    return out.join("\n");
+  }
+  function copyText(t){
+    if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t).then(function(){toast("Panoya kopyalandı.");}).catch(function(){legacyCopy(t);}); }
+    else legacyCopy(t);
+  }
+  function legacyCopy(t){
+    var ta=document.createElement("textarea"); ta.value=t; ta.style.position="fixed"; ta.style.opacity="0";
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); toast("Panoya kopyalandı."); }catch(e){ toast("Otomatik kopyalanamadı."); }
+    document.body.removeChild(ta);
+  }
+
+  /* ---------- Session records ---------- */
+  function upsertRecord(id,c,isNew){
+    var snap=JSON.parse(JSON.stringify(c));
+    var rec=state.records.find(function(r){return r.id===id;});
+    if(rec){ rec.contact=snap; } else { state.records.unshift({id:id,contact:snap,t:Date.now()}); }
+    renderRecords(); saveStore();
+  }
+  function renderRecords(){
+    var list=$("cardsList"); list.innerHTML="";
+    if(!state.records.length){ $("session").classList.remove("show"); return; }
+    $("session").classList.add("show");
+    $("sessionHead").textContent="Taranan — "+state.records.length;
+    state.records.forEach(function(r){
+      var c=r.contact;
+      var name=[c.firstName,c.lastName].filter(Boolean).join(" ")||c.organization||"Adsız kart";
+      var sub=[c.title,c.organization].filter(Boolean).join(" · ")||(c.emails[0]&&c.emails[0].value)||"";
+      var initials=((c.firstName[0]||"")+(c.lastName[0]||"")).toUpperCase()||(c.organization[0]||"?").toUpperCase();
+      var row=document.createElement("div"); row.className="rec";
+      var badge=document.createElement("div"); badge.className="badge"; badge.textContent=initials;
+      var meta=document.createElement("div"); meta.className="meta";
+      var b=document.createElement("b"); b.textContent=name; var s=document.createElement("span"); s.textContent=sub;
+      meta.appendChild(b); meta.appendChild(s);
+      var acts=document.createElement("div"); acts.className="r-actions";
+      var open=document.createElement("button"); open.textContent="Aç";
+      open.addEventListener("click",function(){ state.contact=JSON.parse(JSON.stringify(c)); state.activeId=r.id; renderForm(); renderPreview(); showResults(); window.scrollTo({top:$("results").offsetTop-20,behavior:"smooth"}); });
+      var dl=document.createElement("button"); dl.textContent=".vcf";
+      dl.addEventListener("click",function(){
+        try{ var blob=new Blob([buildVCard(c)],{type:"text/vcard;charset=utf-8"}); var url=URL.createObjectURL(blob);
+          var a=document.createElement("a"); a.href=url; a.download=fileName(c); document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(function(){URL.revokeObjectURL(url);},4000); toast("Kişi dosyası hazır."); }
+        catch(e){ copyText(readable(c)); toast("Bilgiler kopyalandı."); }
+      });
+      acts.appendChild(open); acts.appendChild(dl);
+      row.appendChild(badge); row.appendChild(meta); row.appendChild(acts); list.appendChild(row);
+    });
+  }
+  function saveStore(){
+    var payload=JSON.stringify(state.records.slice(0,50));
+    try{ localStorage.setItem("kartscanner:records",payload); return; }catch(e){}
+    if(window.storage){ try{ window.storage.set("kartscanner:records",payload,false); }catch(e){} }
+  }
+  function loadStore(){
+    try{ var v=localStorage.getItem("kartscanner:records"); if(v){ state.records=JSON.parse(v)||[]; renderRecords(); return; } }catch(e){}
+    if(window.storage){ try{ var p=window.storage.get("kartscanner:records",false);
+      if(p&&p.then){ p.then(function(res){ if(res&&res.value){ try{ state.records=JSON.parse(res.value)||[]; renderRecords(); }catch(e){} } }).catch(function(){}); }
+    }catch(e){} }
+  }
+
+  /* ---------- helpers ---------- */
+  function showResults(){ $("results").classList.add("show"); }
+  var toastTimer;
+  function toast(m){ var t=$("toast"); t.textContent=m; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(function(){t.classList.remove("show");},2600); }
+  function showBanner(m){ var b=$("banner"); b.textContent=m; b.classList.add("show"); }
+  function hideBanner(){ $("banner").classList.remove("show"); }
+
+
+  /* ---------- AI mode (own API key, direct browser call) ---------- */
+  function parseJSON(text){
+    if(!text) return null;
+    var t=text.replace(/```json/gi,"").replace(/```/g,"").trim();
+    try{ return JSON.parse(t); }catch(e){}
+    var m=t.match(/\{[\s\S]*\}/); if(m){ try{ return JSON.parse(m[0]); }catch(e){} }
+    return null;
+  }
+  function fromAI(p){
+    var c=blank();
+    c.firstName=str(p.firstName); c.lastName=str(p.lastName);
+    c.organization=str(p.organization); c.title=str(p.title);
+    c.website=str(p.website); c.address=str(p.address); c.notes=str(p.notes);
+    c.phones=(Array.isArray(p.phones)?p.phones:[]).map(function(x){ x=x||{}; var v=str(x.number||x.value); var l=str(x.label).toLowerCase(); if(["mobile","work","fax","other"].indexOf(l)<0) l="mobile"; return {label:l,value:v}; }).filter(function(x){return x.value;});
+    c.emails=(Array.isArray(p.emails)?p.emails:[]).map(function(x){ x=x||{}; var v=str(x.address||x.value); var l=str(x.label).toLowerCase(); if(["work","personal","other"].indexOf(l)<0) l="work"; return {label:l,value:v}; }).filter(function(x){return x.value;});
+    return c;
+  }
+  function scanAI(){
+    if(!state.colorData){ showBanner("Önce bir kart fotoğrafı seç."); return; }
+    setScanning(true); hideBar(); hideBanner(); setStatus("Yapay zekâ ile okunuyor…");
+    var prompt="You are a precise business-card parser. Read this business card image and return ONLY a minified JSON object (no markdown, no code fences, no commentary) with exactly these keys: firstName, lastName, organization, title, phones, emails, website, address, notes. phones = array of {label, number}; label one of mobile/work/fax/other. emails = array of {label, address}; label one of work/personal/other. Use an empty string or empty array when a field is absent. Preserve international phone formatting. Put the given name in firstName and family name in lastName. Do not invent anything not on the card. The card text may be in Turkish.";
+    fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key":settings.apiKey,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:settings.model||"claude-sonnet-5",
+        max_tokens:1024,
+        messages:[{ role:"user", content:[
+          { type:"image", source:{ type:"base64", media_type:"image/jpeg", data:state.colorData } },
+          { type:"text", text:prompt }
+        ]}]
+      })
+    }).then(function(r){ return r.json(); }).then(function(data){
+      if(data && data.error){ throw new Error((data.error.type||"")+": "+(data.error.message||"api")); }
+      var text=(data.content||[]).filter(function(b){return b.type==="text";}).map(function(b){return b.text;}).join("\n");
+      var parsed=parseJSON(text); if(!parsed) throw new Error("json");
+      applyContact(fromAI(parsed));
+      state.rawText=""; $("raw").classList.remove("show");
+      setScanning(false); setStatus("");
+      showResults();
+      var id="c_"+Date.now(); state.activeId=id; upsertRecord(id,state.contact,true);
+      toast("Yapay zekâ ile okundu — kontrol et.");
+    }).catch(function(err){
+      setScanning(false); setStatus("");
+      var msg=String(err && err.message || "");
+      if(/authentication|api[_-]?key|invalid|401|permission/i.test(msg)) showBanner("API anahtarı geçersiz ya da yetkisiz görünüyor. ⚙ Ayarlar'dan kontrol et (console.anthropic.com).");
+      else if(/rate|429|overloaded|529|billing|credit/i.test(msg)) showBanner("Kota/limit ya da yoğunluk sorunu: "+msg+". Birkaç saniye sonra tekrar dene ya da bakiyeni kontrol et.");
+      else showBanner("Yapay zekâ ile okunamadı ("+(msg||"bağlantı hatası")+"). İnternetini kontrol et ya da ⚙ Ayarlar'dan modu kapatıp cihaz üstü OCR kullan.");
+    });
+  }
+
+  /* ---------- settings ---------- */
+  function loadSettings(){
+    try{
+      settings.aiMode = localStorage.getItem("kartscanner:aimode")==="1";
+      settings.apiKey = localStorage.getItem("kartscanner:apikey")||"";
+      settings.model  = localStorage.getItem("kartscanner:model")||"claude-sonnet-5";
+    }catch(e){}
+    $("aiToggle").checked=settings.aiMode;
+    $("apiKey").value=settings.apiKey;
+    $("model").value=settings.model;
+    updateAiHint();
+  }
+  function saveSettings(){
+    try{
+      localStorage.setItem("kartscanner:aimode", settings.aiMode?"1":"0");
+      localStorage.setItem("kartscanner:apikey", settings.apiKey);
+      localStorage.setItem("kartscanner:model", settings.model);
+    }catch(e){}
+  }
+  function updateAiHint(){
+    $("hint").textContent = settings.aiMode
+      ? "Yapay zekâ modu açık — kart okunmak için buluta gönderilir, çok daha isabetli."
+      : "En iyi sonuç: kartı çerçeveye sığdır, düz tut, iyi ışık.";
+  }
+  $("gear").addEventListener("click",function(){ $("settings").classList.toggle("show"); });
+  $("aiToggle").addEventListener("change",function(){ settings.aiMode=$("aiToggle").checked; saveSettings(); updateAiHint(); });
+  $("apiKey").addEventListener("input",function(){ settings.apiKey=$("apiKey").value.trim(); saveSettings(); });
+  $("model").addEventListener("change",function(){ settings.model=$("model").value; saveSettings(); });
+
+  renderPreview();
+  loadSettings();
+  loadStore();
+})();
+</script>
+</body>
+</html>
